@@ -1,17 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using AutoMapper;
+using CheapAwesome.API.Infrastructure.Filters;
+using CheapAwesome.Domain.Settings;
+using CheapAwesomeAPI.Service;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-
+using System.Linq;
 namespace CheapAwesomeAPI
 {
     public class Startup
@@ -27,7 +24,21 @@ namespace CheapAwesomeAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddAutoMapper();
+
             SwaggerConfiguration(services);
+            RegisterDependency(services);
+        }
+        
+        private void RegisterDependency(IServiceCollection services)
+        {
+            
+            var config = new BargainAPISettings();
+            Configuration.Bind("BargainSupplier", config);      
+            services.AddSingleton(config);
+
+            services.AddSingleton<ApiExceptionFilter>();
+            services.AddScoped<ISupplierHotelService, BargainsSupplierService>();
         }
 
         private static void SwaggerConfiguration(IServiceCollection services)
